@@ -14,6 +14,8 @@ import "./App.css";
 type ActiveTab = "preview" | "editor";
 
 function Preview() {
+  const [pageSize, setPageSize] = useState(5);
+  const [page, setPage] = useState(0);
   const [entries, setEntries] = useState<Record<string, Entry>>();
 
   useEffect(() => {
@@ -31,14 +33,50 @@ function Preview() {
 
   return (
     <div className="my-2">
-      {Object.keys(entries).map((date) => (
-        <div key={date} className="border rounded p-2 mx-2">
-          <div>{date}</div>
-          <Markdown remarkPlugins={[remarkGfm]}>
-            {entries[date].content}
-          </Markdown>
-        </div>
-      ))}
+      <div className="flex flex-row gap-1 mx-2 justify-end">
+        <button
+          disabled={page === 0}
+          onClick={() => {
+            setPage((prev) => prev - 1);
+          }}
+          className="disabled:opacity-50 disabled:cursor-not-allowed border rounded px-2 cursor-pointer hover:bg-slate-100"
+        >
+          prev
+        </button>
+        <button
+          disabled={
+            Math.ceil(Object.entries(entries).length / pageSize) - 1 === page
+          }
+          onClick={() => {
+            setPage((prev) => prev + 1);
+          }}
+          className="disabled:opacity-50 disabled:cursor-not-allowed border rounded px-2 cursor-pointer hover:bg-slate-100"
+        >
+          next
+        </button>
+        <select
+          className="border rounded px-2 cursor-pointer hover:bg-slate-100"
+          onChange={(e) => {
+            const val = e.target.value;
+            setPageSize(Number(val));
+          }}
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
+      </div>
+      {Object.keys(entries)
+        .slice(page * pageSize, page * pageSize + pageSize)
+        .map((date) => (
+          <div key={date} className="border rounded p-2 m-2">
+            <div>{date}</div>
+            <Markdown remarkPlugins={[remarkGfm]}>
+              {entries[date].content}
+            </Markdown>
+          </div>
+        ))}
     </div>
   );
 }
