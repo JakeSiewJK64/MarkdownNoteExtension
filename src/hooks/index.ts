@@ -15,6 +15,8 @@ export function useHotKeys(whiteListKeys?: string[]) {
   );
 
   useEffect(() => {
+    document.body.focus();
+
     // attach the event listener
     document.addEventListener("keydown", handleKeyPress);
 
