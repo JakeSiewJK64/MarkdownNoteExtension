@@ -77,6 +77,7 @@ function Editor() {
 
   return (
     <div className="flex flex-col p-2">
+      <div className="h-[1rem] text-end">{loading && "Saving..."}</div>
       <textarea
         value={todo}
         onChange={(e) => {
@@ -86,7 +87,6 @@ function Editor() {
         placeholder=" i.e. - [ ] grocery shopping"
         className="resize-none rounded w-[100%] border h-100"
       />
-      <div>{loading && "saving..."}</div>
     </div>
   );
 }
@@ -147,6 +147,7 @@ function App() {
         </button>
       </div>
       <Page activeTab={activeTab} />
+      <div className="text-end me-2">@JakeSiewJK64/2025-02-23</div>
     </>
   );
 }
