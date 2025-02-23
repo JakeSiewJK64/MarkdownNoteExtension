@@ -1,35 +1,154 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useEffect, useState } from "react";
+import {
+  saveEntry,
+  getTodaysEntry,
+  getAllEntries,
+  Entry,
+} from "./utils/entries";
+import { cn } from "./utils/cn";
+import { useHotKeys } from "./hooks";
+import "./App.css";
+
+type ActiveTab = "preview" | "editor";
+
+function Preview() {
+  const [entries, setEntries] = useState<Record<string, Entry>>();
+
+  useEffect(() => {
+    const entriesFromCache = getAllEntries();
+
+    if (entriesFromCache) {
+      const json = JSON.parse(entriesFromCache);
+      setEntries(json);
+    }
+  }, []);
+
+  if (!entries) {
+    return null;
+  }
+
+  return (
+    <div className="my-2">
+      {Object.keys(entries).map((date) => (
+        <div key={date} className="border rounded p-2 mx-2">
+          <div>{date}</div>
+          <Markdown remarkPlugins={[remarkGfm]}>
+            {entries[date].content}
+          </Markdown>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Editor() {
+  const [loading, setLoading] = useState(false);
+  const [todo, setTodo] = useState("");
+
+  // save to localstorage
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      saveEntry({
+        content: todo,
+      });
+      setLoading(false);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [todo]);
+
+  useEffect(() => {
+    const todayCache = getTodaysEntry();
+
+    // create todays entry and set to empty content
+    if (!todayCache) {
+      saveEntry({
+        content: "",
+      });
+      return;
+    }
+
+    setTodo(todayCache.content);
+  }, []);
+
+  return (
+    <div className="flex flex-col p-2">
+      <textarea
+        value={todo}
+        onChange={(e) => {
+          setTodo(e.target.value);
+          setLoading(true);
+        }}
+        placeholder=" i.e. - [ ] grocery shopping"
+        className="resize-none rounded w-[100%] border h-100"
+      />
+      <div>{loading && "saving..."}</div>
+    </div>
+  );
+}
+
+function Page(props: { activeTab: ActiveTab }) {
+  switch (props.activeTab) {
+    case "editor":
+      return <Editor />;
+    default:
+      return <Preview />;
+  }
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { ctrlKey, key } = useHotKeys(["k", "p"]);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("editor");
+
+  useEffect(() => {
+    if (ctrlKey) {
+      if (key === "k") {
+        setActiveTab("editor");
+        return;
+      }
+
+      if (key === "p") {
+        setActiveTab("preview");
+        return;
+      }
+    }
+  }, [ctrlKey, key]);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+      <div className="flex flex-row gap-2 m-2 border-b-1 border-b-slate-300 min-w-[20rem]">
+        <button
+          onClick={() => {
+            setActiveTab("editor");
+          }}
+          className={cn(
+            `cursor-pointer hover:bg-red-100 p-2 rounded-t bg-slate-300 ${
+              activeTab === "editor" && "bg-red-300"
+            }`
+          )}
+        >
+          Editor (CTRL + K)
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <button
+          onClick={() => {
+            setActiveTab("preview");
+          }}
+          className={cn(
+            `cursor-pointer hover:bg-red-100 p-2 rounded-t bg-slate-300 ${
+              activeTab === "preview" && "bg-red-300"
+            }`
+          )}
+        >
+          Preview (CTRL + P)
+        </button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Page activeTab={activeTab} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
