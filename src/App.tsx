@@ -9,9 +9,36 @@ import {
 } from "./utils/entries";
 import { cn } from "./utils/cn";
 import { useHotKeys } from "./hooks";
+import CopySVG from "./assets/icons/copy.svg";
+import Tick from "./assets/icons/tick.svg";
 import "./App.css";
 
 type ActiveTab = "preview" | "editor";
+
+function CopyClipboardButton(props: { content: string; title: string }) {
+  const [clicked, setClicked] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (clicked) {
+        setClicked(false);
+      }
+    }, 1500);
+  }, [clicked]);
+
+  return (
+    <button
+      title={props.title}
+      className="border rounded p-1 w-[1.5rem] hover:bg-slate-100 cursor-pointer"
+      onClick={() => {
+        navigator.clipboard.writeText(props.content);
+        setClicked(true);
+      }}
+    >
+      {clicked ? <img src={Tick} /> : <img src={CopySVG} />}
+    </button>
+  );
+}
 
 function Preview() {
   const [pageSize, setPageSize] = useState(5);
@@ -71,7 +98,13 @@ function Preview() {
         .slice(page * pageSize, page * pageSize + pageSize)
         .map((date) => (
           <div key={date} className="border rounded p-2 m-2">
-            <div>{date}</div>
+            <div className="flex flex-row justify-between">
+              <div>{date}</div>
+              <CopyClipboardButton
+                content={entries[date].content}
+                title="Copy markdown content"
+              />
+            </div>
             <Markdown remarkPlugins={[remarkGfm]}>
               {entries[date].content}
             </Markdown>
