@@ -156,7 +156,7 @@ function Editor() {
           setLoading(true);
         }}
         placeholder=" i.e. - [ ] grocery shopping"
-        className="resize-none rounded w-[100%] border h-100"
+        className="p-2 resize-none rounded w-[100%] border h-100"
       />
     </div>
   );
