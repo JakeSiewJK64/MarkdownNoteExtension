@@ -11,7 +11,9 @@ import { cn } from "./utils/cn";
 import { useHotKeys } from "./hooks";
 import CopySVG from "./assets/icons/copy.svg";
 import Tick from "./assets/icons/tick.svg";
+import DownloadSVG from "./assets/icons/download.svg";
 import "./App.css";
+import { exportEntriesToCSV } from "./utils/export";
 
 type ActiveTab = "preview" | "editor";
 
@@ -36,6 +38,18 @@ function CopyClipboardButton(props: { content: string; title: string }) {
       }}
     >
       {clicked ? <img src={Tick} /> : <img src={CopySVG} />}
+    </button>
+  );
+}
+
+function ExportCSVButton() {
+  return (
+    <button
+      title="Export notes to csv"
+      className="border rounded p-1 w-[1.5rem] hover:bg-slate-100 cursor-pointer"
+      onClick={() => exportEntriesToCSV()}
+    >
+      <img src={DownloadSVG} />
     </button>
   );
 }
@@ -93,6 +107,7 @@ function Preview() {
           <option value={20}>20</option>
           <option value={50}>50</option>
         </select>
+        <ExportCSVButton />
       </div>
       {Object.keys(entries)
         .slice(page * pageSize, page * pageSize + pageSize)
