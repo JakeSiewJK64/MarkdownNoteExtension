@@ -21,3 +21,10 @@ h5 {
 h6 {
   font-size: 10.72px;
 }
+
+code {
+  background: lightgrey;
+  color: black;
+  padding: 2.5px;
+  border-radius: 2.5px;
+}
