@@ -151,15 +151,10 @@ function Editor() {
   useEffect(() => {
     const todayCache = getTodaysEntry();
 
-    // create todays entry and set to empty content
-    if (!todayCache) {
-      saveEntry({
-        content: "",
-      });
-      return;
+    // if today cache available, load todays cache
+    if (todayCache) {
+      setTodo(todayCache.content);
     }
-
-    setTodo(todayCache.content);
   }, []);
 
   return (
