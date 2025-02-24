@@ -6,6 +6,7 @@ import {
   getTodaysEntry,
   getAllEntries,
   Entry,
+  getTodaysDate,
 } from "./utils/entries";
 import { cn } from "./utils/cn";
 import { useHotKeys } from "./hooks";
@@ -163,7 +164,10 @@ function Editor() {
 
   return (
     <div className="flex flex-col p-2">
-      <div className="h-[1rem] text-end">{loading && "Saving..."}</div>
+      <div className="h-[2rem] justify-end flex flex-row gap-2">
+        <div>Time: {getTodaysDate()}</div>
+        <div>{loading && "Saving..."}</div>
+      </div>
       <textarea
         value={todo}
         onChange={(e) => {
