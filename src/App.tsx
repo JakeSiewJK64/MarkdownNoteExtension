@@ -10,11 +10,11 @@ import {
 } from "./utils/entries";
 import { cn } from "./utils/cn";
 import { useHotKeys } from "./hooks";
+import { exportEntriesToCSV } from "./utils/export";
 import CopySVG from "./assets/icons/copy.svg";
 import Tick from "./assets/icons/tick.svg";
 import DownloadSVG from "./assets/icons/download.svg";
 import "./App.css";
-import { exportEntriesToCSV } from "./utils/export";
 
 type ActiveTab = "preview" | "editor";
 
