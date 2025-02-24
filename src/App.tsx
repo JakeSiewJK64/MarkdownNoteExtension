@@ -1,242 +1,53 @@
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { useEffect, useState } from "react";
-import {
-  saveEntry,
-  getTodaysEntry,
-  getAllEntries,
-  Entry,
-  getTodaysDate,
-} from "./utils/entries";
+import { useEffect } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import { cn } from "./utils/cn";
 import { useHotKeys } from "./hooks";
-import { exportEntriesToCSV } from "./utils/export";
-import CopySVG from "./assets/icons/copy.svg";
-import Tick from "./assets/icons/tick.svg";
-import DownloadSVG from "./assets/icons/download.svg";
 import "./App.css";
-
-type ActiveTab = "preview" | "editor";
-
-function CopyClipboardButton(props: { content: string; title: string }) {
-  const [clicked, setClicked] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (clicked) {
-        setClicked(false);
-      }
-    }, 1500);
-  }, [clicked]);
-
-  return (
-    <button
-      title={props.title}
-      className="border rounded p-1 w-[1.5rem] hover:bg-slate-100 cursor-pointer"
-      onClick={() => {
-        navigator.clipboard.writeText(props.content);
-        setClicked(true);
-      }}
-    >
-      {clicked ? <img src={Tick} /> : <img src={CopySVG} />}
-    </button>
-  );
-}
-
-function ExportCSVButton() {
-  return (
-    <button
-      title="Export notes to csv"
-      className="border rounded p-1 w-[1.5rem] hover:bg-slate-100 cursor-pointer"
-      onClick={() => exportEntriesToCSV()}
-    >
-      <img src={DownloadSVG} />
-    </button>
-  );
-}
-
-function Preview() {
-  const [pageSize, setPageSize] = useState(5);
-  const [page, setPage] = useState(0);
-  const [entries, setEntries] = useState<Record<string, Entry>>();
-
-  useEffect(() => {
-    const entriesFromCache = getAllEntries();
-
-    if (entriesFromCache) {
-      const json = JSON.parse(entriesFromCache);
-      setEntries(json);
-    }
-  }, []);
-
-  if (!entries) {
-    return null;
-  }
-
-  return (
-    <div className="my-2">
-      <div className="flex flex-row gap-1 mx-2 justify-end">
-        <button
-          disabled={page === 0}
-          onClick={() => {
-            setPage((prev) => prev - 1);
-          }}
-          className="disabled:opacity-50 disabled:cursor-not-allowed border rounded px-2 cursor-pointer hover:bg-slate-100"
-        >
-          prev
-        </button>
-        <button
-          disabled={
-            Math.ceil(Object.entries(entries).length / pageSize) - 1 === page
-          }
-          onClick={() => {
-            setPage((prev) => prev + 1);
-          }}
-          className="disabled:opacity-50 disabled:cursor-not-allowed border rounded px-2 cursor-pointer hover:bg-slate-100"
-        >
-          next
-        </button>
-        <select
-          className="border rounded px-2 cursor-pointer hover:bg-slate-100"
-          onChange={(e) => {
-            const val = e.target.value;
-            setPageSize(Number(val));
-          }}
-        >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
-        <ExportCSVButton />
-      </div>
-      {Object.keys(entries)
-        .sort(
-          (dateA, dateB) =>
-            new Date(dateB).getDate() - new Date(dateA).getDate()
-        )
-        .slice(page * pageSize, page * pageSize + pageSize)
-        .map((date) => (
-          <div key={date} className="border rounded p-2 m-2">
-            <div className="flex flex-row justify-between">
-              <div>{date}</div>
-              <CopyClipboardButton
-                content={entries[date].content}
-                title="Copy markdown content"
-              />
-            </div>
-            <Markdown remarkPlugins={[remarkGfm]}>
-              {entries[date].content}
-            </Markdown>
-          </div>
-        ))}
-    </div>
-  );
-}
-
-function Editor() {
-  const [loading, setLoading] = useState(false);
-  const [todo, setTodo] = useState("");
-
-  // save to localstorage
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      saveEntry({
-        content: todo,
-      });
-      setLoading(false);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [todo]);
-
-  useEffect(() => {
-    const todayCache = getTodaysEntry();
-
-    // if today cache available, load todays cache
-    if (todayCache) {
-      setTodo(todayCache.content);
-    }
-  }, []);
-
-  return (
-    <div className="flex flex-col p-2">
-      <div className="h-[2rem] justify-end flex flex-row gap-2">
-        <div>Time: {getTodaysDate()}</div>
-        <div>{loading && "Saving..."}</div>
-      </div>
-      <textarea
-        value={todo}
-        onChange={(e) => {
-          setTodo(e.target.value);
-          setLoading(true);
-        }}
-        placeholder=" i.e. - [ ] grocery shopping"
-        className="p-2 resize-none rounded w-[100%] border h-100"
-      />
-    </div>
-  );
-}
-
-function Page(props: { activeTab: ActiveTab }) {
-  switch (props.activeTab) {
-    case "editor":
-      return <Editor />;
-    default:
-      return <Preview />;
-  }
-}
 
 function App() {
   const { ctrlKey, key } = useHotKeys(["k", "p"]);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("editor");
+  const navigate = useNavigate();
+  const { pathname: pathName } = useLocation();
 
   useEffect(() => {
     if (ctrlKey) {
       if (key === "k") {
-        setActiveTab("editor");
+        navigate("/");
         return;
       }
 
       if (key === "p") {
-        setActiveTab("preview");
+        navigate("/preview");
         return;
       }
     }
-  }, [ctrlKey, key]);
+  }, [ctrlKey, key, navigate]);
 
   return (
     <>
       <div className="flex flex-row gap-2 m-2 border-b-1 border-b-slate-300 min-w-[20rem]">
-        <button
-          onClick={() => {
-            setActiveTab("editor");
-          }}
+        <a
+          href="/#/"
           className={cn(
             `cursor-pointer hover:bg-red-100 p-2 rounded-t bg-slate-300 ${
-              activeTab === "editor" && "bg-red-300"
+              pathName === "/" && "bg-red-300"
             }`
           )}
         >
           Editor (CTRL + K)
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("preview");
-          }}
+        </a>
+        <a
+          href="/#/preview"
           className={cn(
             `cursor-pointer hover:bg-red-100 p-2 rounded-t bg-slate-300 ${
-              activeTab === "preview" && "bg-red-300"
+              pathName === "/preview" && "bg-red-300"
             }`
           )}
         >
           Preview (CTRL + P)
-        </button>
+        </a>
       </div>
-      <Page activeTab={activeTab} />
-      <div className="text-end me-2">@JakeSiewJK64/2025-02-23</div>
+      <Outlet />
     </>
   );
 }
