@@ -9,17 +9,17 @@ export function getTodaysDate() {
 export function saveEntry(content: { content: string }) {
   const todaysDate = getTodaysDate();
   const allCache = getAllEntries();
-  const updatedContent = { [todaysDate]: content };
+  const newContent = { [todaysDate]: content.content };
 
   localStorage.setItem(
     "todoCache",
     JSON.stringify({
-      ...updatedContent,
       ...(allCache && JSON.parse(allCache)),
+      ...newContent,
     })
   );
 
-  return updatedContent;
+  return newContent;
 }
 
 export function getAllEntries() {
