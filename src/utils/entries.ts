@@ -8,11 +8,18 @@ export function getTodaysDate() {
 
 export function saveEntry(content: { content: string }) {
   const todaysDate = getTodaysDate();
-  const saveContent = { [todaysDate]: content };
+  const allCache = getAllEntries();
+  const updatedContent = { [todaysDate]: content };
 
-  localStorage.setItem("todoCache", JSON.stringify(saveContent));
+  localStorage.setItem(
+    "todoCache",
+    JSON.stringify({
+      ...updatedContent,
+      ...(allCache && JSON.parse(allCache)),
+    })
+  );
 
-  return saveContent;
+  return updatedContent;
 }
 
 export function getAllEntries() {
