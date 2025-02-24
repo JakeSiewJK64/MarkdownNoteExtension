@@ -111,6 +111,10 @@ function Preview() {
         <ExportCSVButton />
       </div>
       {Object.keys(entries)
+        .sort(
+          (dateA, dateB) =>
+            new Date(dateB).getDate() - new Date(dateA).getDate()
+        )
         .slice(page * pageSize, page * pageSize + pageSize)
         .map((date) => (
           <div key={date} className="border rounded p-2 m-2">
