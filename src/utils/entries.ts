@@ -27,7 +27,7 @@ export function getAllEntries() {
 }
 
 export function getTodaysEntry() {
-  const todoLocalStorage = localStorage.getItem("todoCache");
+  const todoLocalStorage = getAllEntries();
   const todaysDate = getTodaysDate();
 
   // handle first time cache setup
