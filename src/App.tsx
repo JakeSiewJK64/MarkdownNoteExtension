@@ -21,13 +21,17 @@ function App() {
         return;
       }
     }
-  }, [ctrlKey, key, navigate]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctrlKey, key]);
 
   return (
     <>
       <div className="flex flex-row gap-2 m-2 border-b-1 border-b-slate-300 min-w-[20rem]">
-        <a
-          href="/#/"
+        <button
+          onClick={() => {
+            navigate("/");
+          }}
           className={cn(
             `cursor-pointer hover:bg-red-100 p-2 rounded-t bg-slate-300 ${
               pathName === "/" && "bg-red-300"
@@ -35,9 +39,11 @@ function App() {
           )}
         >
           Editor (CTRL + K)
-        </a>
-        <a
-          href="/#/preview"
+        </button>
+        <button
+          onClick={() => {
+            navigate("/preview");
+          }}
           className={cn(
             `cursor-pointer hover:bg-red-100 p-2 rounded-t bg-slate-300 ${
               pathName === "/preview" && "bg-red-300"
@@ -45,7 +51,7 @@ function App() {
           )}
         >
           Preview (CTRL + P)
-        </a>
+        </button>
       </div>
       <Outlet />
     </>
